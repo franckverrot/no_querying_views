@@ -79,6 +79,8 @@ queries are fast as hell.
 
 What is slowing down the application is the combination of the
 rendering and the querying:
+
+
   1. Rendering partials is slower than inline code
   2. Executing a query costs time (retrieving the DB connection within
      the pool, executing and fetching the results, ...): the resources
@@ -96,6 +98,14 @@ full of litterature about it.
 
 Right now, here is a piece of code to help you remove any DB query from your
 views.
+
+## What does this code?
+
+It will raise an exception everytime you and your people will try to
+query the database from within the views.
+
+It only overrides the ``execute`` method of the adapter and check the
+call stack.
 
 ###Rails 3.x
 
