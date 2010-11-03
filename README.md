@@ -33,40 +33,51 @@ In Ruby code, your models would look like this:
     end
 
 
-Now, if you want to display them on a single page, here is a naive version of
-cart_controller.rb:
+#####app/models/category.rb
+    class Category < ActiveRecord::Base
+    end
 
-#####app/controllers/cart_controller.rb
-    class CartController < ApplicationController
+Now, if you want to display them on a single page, here is a naive version of
+order_controller.rb:
+
+#####app/controllers/order_controller.rb
+    class OrderController < ApplicationController
       def show
-        @cart = Cart.find(params[:id])  # 1 query
+        @order = Order.find(params[:id])  # 1 query
       end
     end
 
 And a naive version of the views used to display the result:
 
-#####app/views/cart/show.html.haml
+#####app/views/orders/show.html.haml
     %h1
-      = @cart.title
+      = @order.title
     %h2
       %span Items
       %ul
-        = render :partial => 'item', :collection => cart.items        # Many queries.
+        = render :partial => 'lines', :collection => order.lines   # 1 query, so far: 2 queries
 
-#####app/views/cart/show.html.haml
+#####app/views/orders/_lines.html.haml executed for **each single line**
     %li
       %span
-        = item.title
+        = line.item.title          # 1 query
+        = line.price
       %div{:class => 'item_description'}
-        = item.description
-        = item.category       # Even more queries.
+        = line.item.description    # 0 query (cached)
+        = line.item.category       # 1 query
 
 The problem
 -----------
 
 If you use a tool that generates execution traces (like NewRelic RPM),
-you will see that - for 1 cart, 40 items, 20 categories - you will
-execute 1 + 40 * 40 = 161 queries against the database!
+you will see that - for 1 order, 40 lines, 30 items, 20 categories - you will
+execute:
+   1 (select * from order)
++  1 (select * from lines inner join ... where order_id = foo)
++ 40 (select * from items inner join ... where line.item_id = bar)
++ 40 (select * from categories inner join ... where item.category_id = baz)
+ ----
+  82 queries against the database!
 
 This is called the [N + 1 problem](http://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations) and it can be solved by an eager-loading strategy.
 
@@ -109,7 +120,7 @@ call stack.
 
 ####Install
     cd /my/rails/3/app_root/
-    wget http://github.com/cesario/no_querying_views/tree/master/no_querying_views.rb > config/initializers/no_querying_views.rb
+    wget http://github.com/cesario/no_querying_views/raw/master/no_querying_views.rb > config/initializers/no_querying_views.rb
 
 ####Uninstall
     cd /my/rails/3/app_root/
