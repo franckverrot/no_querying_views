@@ -1,7 +1,7 @@
 No Querying View
 ================
 
-This Rails plugin will tell you when you and your folks are querying the
+This Rails3 plugin will tell you when you and your folks are querying the
 database from something else than a controller and a model.
 
 Context
@@ -16,34 +16,34 @@ related item, and each of these items belongs to 1 category.
 In Ruby code, your models would look like this:
 
 #####app/models/order.rb
-    class Order < AR::Base
+    class Order < ActiveRecord::Base
       has_many :lines
     end
 
 
 #####app/models/line.rb
-    class Line < AR::Base
+    class Line < ActiveRecord::Base
       has_one :item
     end
 
 
 #####app/models/item.rb
-    class Item < AR::Base
+    class Item < ActiveRecord::Base
       belongs_to :category
     end
 
 
-Say now you want to display them onto a single page, here's your
-naive version of cart_controller.rb:
+Now, if you want to display them on a single page, here is a naive version of
+cart_controller.rb:
 
 #####app/controllers/cart_controller.rb
-    class CartController < AC::Base
+    class CartController < ApplicationController
       def show
-        @cart = Cart.find(params[:id])
+        @cart = Cart.find(params[:id])  # 1 query
       end
     end
 
-And a version of the views used to display the result:
+And a naive version of the views used to display the result:
 
 #####app/views/cart/show.html.haml
     %h1
@@ -51,37 +51,35 @@ And a version of the views used to display the result:
     %h2
       %span Items
       %ul
-        = render :partial => 'item', :collection => cart.items (1)
+        = render :partial => 'item', :collection => cart.items        # Many queries.
 
 #####app/views/cart/show.html.haml
     %li
       %span
         = item.title
-      %div{:class => 'item_description}
+      %div{:class => 'item_description'}
         = item.description
-        = item.category (2)
+        = item.category       # Even more queries.
 
 The problem
 -----------
 
-If you use a tool that generates execution traces (like New Relic RPM),
+If you use a tool that generates execution traces (like NewRelic RPM),
 you will see that - for 1 cart, 40 items, 20 categories - you will
-execute 1 * 40 * 40 = 161 queries against the database!
+execute 1 + 40 * 40 = 161 queries against the database!
 
-This is called the N + 1 problem [http://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations] and it can be solved by the eager-loading strategy.
+This is called the [N + 1 problem](http://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations) and it can be solved by an eager-loading strategy.
 
-######## OH: "Yeah but my DB is so small and so fast that I don't even see that"
+######## OH: "Yeah, but my database is so small and so fast that I don't even see that!"
 
-This is true if you are alone on the website. But Rails will also have
-troubles generating the page (HAML, ERB, whatever) and New Relic won't
-even tell you that the querie are slowing down the application: the
-queries are fast as hell.
+This is true if you are the only user of the website.  But Rails will also have
+troubles generating the page (HAML, ERB, whatever) and NewRelic won't tell you
+that the queries are slowing down the application: the queries are fast as
+hell.
 
-What is slowing down the application is the combination of the
-rendering and the querying:
+The combination of the rendering and the querying is slowing down the application, because:
 
-
-  1. Rendering partials is slower than inline code
+  1. Rendering a partial is slower than inline code
   2. Executing a query costs time (retrieving the DB connection within
      the pool, executing and fetching the results, ...): the resources
      are not being used for free on your machine.
@@ -89,22 +87,22 @@ rendering and the querying:
 The solution
 ------------
 
-Silver bullets don't exist but most of the time you can speed up the
-performance by eager-loading what you will expect in your views.
+Silver bullets don't exist, but most of the time you can speed up the
+performance by eager-loading the data you expect in your views.
 
 From an architectural point of view, it is **wrong** to query the DB
 from a view. There are many reasons not to do so and the internet is
-full of litterature about it.
+full of literature about it.
 
 Right now, here is a piece of code to help you remove any DB query from your
 views.
 
-## What does this code?
+## What does this code do?
 
-It will raise an exception everytime you and your people will try to
-query the database from within the views.
+It will raise an exception everytime you and your people try to query the
+database from within a view.
 
-It only overrides the ``execute`` method of the adapter and check the
+It only overrides the ``execute`` method of the adapter and checks the
 call stack.
 
 ###Rails 3.x
