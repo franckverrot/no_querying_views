@@ -109,7 +109,7 @@ call stack.
 
 ####Install
     cd /my/rails/3/app_root/
-    wget http://github.com/cesario/no_querying_view/tree/master/no_querying_views.rb > config/initializers/no_querying_views.rb
+    wget http://github.com/cesario/no_querying_views/tree/master/no_querying_views.rb > config/initializers/no_querying_views.rb
 
 ####Uninstall
     cd /my/rails/3/app_root/
