@@ -4,6 +4,8 @@ No Querying View
 This Rails3 plugin will tell you when you and your folks are querying the
 database from something else than a controller and a model.
 
+It supports SQLite, SQLite3, MySQL, PostgreSQL and Mongoid.
+
 Context
 -------
 
@@ -118,10 +120,25 @@ call stack.
 
 ###Rails 3.x
 
-####Install
+####ActiveRecord
+
+#####Install
     cd /my/rails/3/app_root/
     wget http://github.com/cesario/no_querying_views/raw/master/no_querying_views.rb > config/initializers/no_querying_views.rb
 
-####Uninstall
+#####Uninstall
     cd /my/rails/3/app_root/
     rm config/initializers/no_querying_views.rb
+
+
+####Mongoid
+
+#####Install
+    cd /my/rails/3/app_root/
+    wget http://github.com/cesario/no_querying_views/raw/master/mongoid_no_querying_views.rb > config/initializers/mongoid_no_querying_views.rb
+
+#####Uninstall
+    cd /my/rails/3/app_root/
+    rm config/initializers/no_querying_views.rb
+
+
