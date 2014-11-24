@@ -1,13 +1,15 @@
-No Querying View
-================
+# No Querying Views
 
-This Rails3 plugin will tell you when you and your folks are querying the
-database from something else than a controller and a model.
+This gem will tell you when your team when they are querying the
+database from a view.
 
-It supports SQLite, SQLite3, MySQL, PostgreSQL and Mongoid.
+It currently supports SQLite3 and PostgreSQL.
 
-Context
--------
+## Installation
+
+    gem install no_querying_views
+
+## Context
 
 Rails is a MVC framework. The separation of concern should be respected
 to prevent bad things to happen in your application.
@@ -17,59 +19,64 @@ related item, and each of these items belongs to 1 category.
 
 In Ruby code, your models would look like this:
 
-#####app/models/order.rb
-    class Order < ActiveRecord::Base
-      has_many :lines
-    end
+```ruby
+# app/models/order.rb
+class Order < ActiveRecord::Base
+  has_many :lines
+end
 
 
-#####app/models/line.rb
-    class Line < ActiveRecord::Base
-      has_one :item
-    end
+# app/models/line.rb
+class Line < ActiveRecord::Base
+  has_one :item
+end
 
 
-#####app/models/item.rb
-    class Item < ActiveRecord::Base
-      belongs_to :category
-    end
+# app/models/item.rb
+class Item < ActiveRecord::Base
+  belongs_to :category
+end
 
 
-#####app/models/category.rb
-    class Category < ActiveRecord::Base
-    end
+# app/models/category.rb
+class Category < ActiveRecord::Base
+end
+```
 
 Now, if you want to display them on a single page, here is a naive version of
 order_controller.rb:
 
-#####app/controllers/order_controller.rb
-    class OrderController < ApplicationController
-      def show
-        @order = Order.find(params[:id])  # 1 query
-      end
-    end
+```ruby
+# app/controllers/order_controller.rb
+class OrderController < ApplicationController
+  def show
+    @order = Order.find(params[:id])  # 1 query
+  end
+end
+```
 
 And a naive version of the views used to display the result:
 
-#####app/views/orders/show.html.haml
-    %h1
-      = @order.title
-    %h2
-      %span Items
-      %ul
-        = render :partial => 'lines', :collection => order.lines   # 1 query, so far: 2 queries
+```ruby
+# app/views/orders/show.html.haml
+%h1
+  = @order.title
+%h2
+  %span Items
+  %ul
+    = render :partial => 'lines', :collection => order.lines   # 1 query, so far: 2 queries
 
-#####app/views/orders/_lines.html.haml executed for **each single line**
-    %li
-      %span
-        = line.item.title          # 1 query
-        = line.price
-      %div{:class => 'item_description'}
-        = line.item.description    # 0 query (cached)
-        = line.item.category       # 1 query
+# app/views/orders/_lines.html.haml executed for **each single line**
+%li
+  %span
+    = line.item.title          # 1 query
+    = line.price
+  %div{:class => 'item_description'}
+    = line.item.description    # 0 query (cached)
+    = line.item.category       # 1 query
+```
 
-The problem
------------
+## The problem
 
 If you use a tool that generates execution traces (like NewRelic RPM),
 you will see that - for 1 order, 40 lines, 30 items, 20 categories - you will
@@ -97,8 +104,7 @@ The combination of the rendering and the querying is slowing down the applicatio
      the pool, executing and fetching the results, ...): the resources
      are not being used for free on your machine.
 
-The solution
-------------
+## The solution
 
 Silver bullets don't exist, but most of the time you can speed up the
 performance by eager-loading the data you expect in your views.
@@ -118,27 +124,6 @@ database from within a view.
 It only overrides the ``execute`` method of the adapter and checks the
 call stack.
 
-###Rails 3.x
+## License
 
-####ActiveRecord
-
-#####Install
-    cd /my/rails/3/app_root/
-    wget http://github.com/cesario/no_querying_views/raw/master/no_querying_views.rb > config/initializers/no_querying_views.rb
-
-#####Uninstall
-    cd /my/rails/3/app_root/
-    rm config/initializers/no_querying_views.rb
-
-
-####Mongoid
-
-#####Install
-    cd /my/rails/3/app_root/
-    wget http://github.com/cesario/no_querying_views/raw/master/mongoid_no_querying_views.rb > config/initializers/mongoid_no_querying_views.rb
-
-#####Uninstall
-    cd /my/rails/3/app_root/
-    rm config/initializers/no_querying_views.rb
-
-
+MIT License. Copyright 2014 - Franck Verrot <franck@verrot.fr>
