@@ -5,9 +5,21 @@ database from a view.
 
 It currently supports SQLite3 and PostgreSQL.
 
-## Installation
+
+## Requirements
+
+* Rails 5.x
+
+## INSTALL
+
+Manually, you can install the gem:
 
     gem install no_querying_views
+
+In your gemspec:
+
+    gem 'no_querying_views', '~> 2.0.0'
+
 
 ## Context
 

@@ -1,8 +1,6 @@
-# encoding: utf-8
-
 Gem::Specification.new do |s|
   s.name        = "no_querying_views"
-  s.version     = '1.0.0'
+  s.version     = '2.0.0'
   s.authors     = ["Franck Verrot"]
   s.email       = "franck@verrot.fr"
   s.homepage    = "https://github.com/franckverrot/no_querying_views"
@@ -16,9 +14,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency "minitest"
 
   s.add_dependency 'rake'
-  s.add_dependency 'actionpack',          '>= 4.0.0'
-  s.add_dependency 'activerecord',        '>= 4.0.0'
-  s.add_development_dependency 'railties','>= 4.0.0'
+  s.add_dependency 'actionpack',          '~> 5.0'
+  s.add_dependency 'activerecord',        '~> 5.0'
+  s.add_development_dependency 'railties','~> 5.0'
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'pg'
 end

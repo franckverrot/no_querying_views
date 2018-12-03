@@ -11,15 +11,15 @@ class AppTest < Minitest::Test
     rescue Exception => e
       @exception = e
     end
+
     assert_equal NoQueryingViewError, @exception.class
   end
 
   def test_non_querying_view_wont_raise
     status, headers, body = FooController.action(:non_querying).call(env)
-    @response = ActionDispatch::TestResponse.new(status, headers, body)
-    @controller = body.request.env['action_controller.instance']
+    response = ActionDispatch::TestResponse.new(status, headers, body)
 
-    assert_equal      200, @response.status
-    assert_equal "test\n", @response.body
+    assert_equal      200, response.status
+    assert_equal "test\n", response.body
   end
 end
