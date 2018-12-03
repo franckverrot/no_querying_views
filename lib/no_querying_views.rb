@@ -14,26 +14,34 @@ if !Rails.env.production?
 
   NoQueryingViewError = Class.new(Exception)
 
+  module NoQueryingViews
+    def self.included(base)
+      base.class_eval do
+        alias_method_chain :exec_query, :nqv
+      end
+    end
+
+    def exec_query_with_nqv(*args)
+      first_view   = caller.grep(/app\/views/).first
+      first_helper = caller.grep(/app\/helpers/).first
+
+      # if we're coming from a view, let's analyze the situation
+      if first_view && (first_helper.nil? || (caller.index(first_view) < caller.index(first_helper)))
+        reason = first_view || first_helper
+        file, line, _ = reason.split(':')
+        raise NoQueryingViewError, "Latest query located in #{file}, line #{line}"
+      else
+        exec_query_without_nqv(*args)
+      end
+    end
+  end
+
   module ::ActiveRecord
     module ConnectionAdapters
       %w(PostgreSQLAdapter SQLite3Adapter).each do |adapter_name|
         begin
           adapter = const_get adapter_name
-          adapter.class_eval do
-            def exec_query(*args)
-              first_view   = caller.grep(/app\/views/).first
-              first_helper = caller.grep(/app\/helpers/).first
-
-              # if we're coming from a view, let's analyze the situation
-              if !first_view.nil? and (first_helper.nil? or (caller.index(first_view) < caller.index(first_helper)))
-                reason = first_view || first_helper
-                file, line, _ = reason.split(':')
-                raise NoQueryingViewError.new("Latest query located in #{file}, line #{line}")
-              else
-                super
-              end
-            end
-          end
+          adapter.send(:include, NoQueryingViews)
         rescue Exception => e
           puts "#{e.class} happened: #{e.message}"
         end

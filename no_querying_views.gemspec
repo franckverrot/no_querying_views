@@ -16,9 +16,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency "minitest"
 
   s.add_dependency 'rake'
-  s.add_dependency 'actionpack',          '>= 4.0.0'
-  s.add_dependency 'activerecord',        '>= 4.0.0'
-  s.add_development_dependency 'railties','>= 4.0.0'
+  s.add_dependency 'actionpack',          '~> 4.0'
+  s.add_dependency 'activerecord',        '~> 4.0'
+  s.add_development_dependency 'railties','~> 4.0'
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'pg'
 end
