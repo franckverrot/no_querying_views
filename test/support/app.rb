@@ -20,6 +20,4 @@ end
 
 ENV['DATABASE_URL'] = 'sqlite3:test/fixtures/foo.sqlite3'
 
-Rails.application.config.active_record.sqlite3.represent_boolean_as_integer = true
-
 Rails.application.initialize!

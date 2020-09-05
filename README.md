@@ -8,7 +8,8 @@ It currently supports SQLite3 and PostgreSQL.
 
 ## Requirements
 
-* Rails 5.x
+* Rails 5+
+
 
 ## INSTALL
 
@@ -18,8 +19,10 @@ Manually, you can install the gem:
 
 In your gemspec:
 
-    gem 'no_querying_views', '~> 2.0.0'
+    gem 'no_querying_views', '~> 6.0.0'
 
+(There are no versions 3 to 6, I decided to align this gem's version with Rails
+major versions.)
 
 ## Context
 
@@ -102,7 +105,7 @@ execute:
 
 This is called the [N + 1 problem](http://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations) and it can be solved by an eager-loading strategy.
 
-######## OH: "Yeah, but my database is so small and so fast that I don't even see that!"
+> "Yeah, but my database is so small and so fast that I don't even see that!"
 
 This is true if you are the only user of the website.  But Rails will also have
 troubles generating the page (HAML, ERB, whatever) and NewRelic won't tell you
